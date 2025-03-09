@@ -1,0 +1,19 @@
+{
+    "files.associations": {
+        "**/frontmatter.json": "jsonc",
+        "**/.frontmatter/config/*.json": "jsonc",
+        "*.atml": "html",
+        "*.njk": "html",
+        "*.fish": "powershell",
+        "*.js": "javascript",
+        "*.mdx": "markdown",
+        ".babelrc": "json",
+        ".huskyrc": "json",
+        ".env*": "dotenv",
+        "string_view": "cpp",
+        "random": "cpp",
+        "cstddef": "cpp",
+        "array": "cpp",
+        "initializer_list": "cpp"
+    }
+}
