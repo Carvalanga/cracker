@@ -1,14 +1,10 @@
 #include <sys/stat.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "cracker.h"
 
-int main()
-{
-	printf("result = %d\n", run_crack());
-	return 0;
-}
 
 size_t get_file_size(FILE* pfile)
 {
@@ -18,48 +14,38 @@ size_t get_file_size(FILE* pfile)
     return st.st_size;
 }
 
-// int is_file_exists(const char *path)
-// {
-//     struct stat st;
-
-//     stat(path, &st);
-
-//     if (st.st_mode)
-//         return 1;
-
-//     return 0;
-// }
-
-CRACK_ERRORS run_crack()
+CRACK_ERRORS crack()
 {
-	FILE* file = fopen(FILE_TO_CRACK_NAME, "r+b");
+	FILE* file = fopen(FILE_TO_CRACK_NAME, "rb");
 	if(!file)
 		return CANT_OPEN_FILE;
 
-	CRACK_ERRORS err_code = crack(file);
-	fclose(file);
-
-	return err_code;
-}
-
-static CRACK_ERRORS crack(FILE* file)
-{
 	size_t file_size = get_file_size(file);
 	byte* buf = (byte*)calloc(file_size, sizeof(byte));
 	fread(buf, sizeof(byte), file_size, file);
 
-	printf("HASH = %d\n", calc_byte_hash(buf, file_size));
+	fclose(file);
 
-	if(calc_byte_hash(buf, file_size) != HASH_OF_INPUT_FILE)
+	HASH input_hash = calc_byte_hash(buf, file_size);
+
+	if(input_hash == HASH_OF_OUTPUT_FILE)
+		return FILE_ALREADY_HACKED;
+
+	if(input_hash != HASH_OF_INPUT_FILE)
 		return INCORRECT_FILE_СONTENT;
 
-	change_bytes(buf);
+	memcpy(buf + OFFSET_TO_HACK, BYTES_TO_HACK, sizeof(BYTES_TO_HACK) / sizeof(BYTES_TO_HACK[0]));
 
 	if(calc_byte_hash(buf, file_size) != HASH_OF_OUTPUT_FILE)
 		return INCORRECT_BYTE_CHANGES;
 
+	file = fopen(FILE_TO_CRACK_NAME, "wb");
+
+	if(!file)
+		return FILE_ERROR_WHILE_PATCHING;
 	fwrite(buf, sizeof(byte), file_size, file);
 
+	fclose(file);
 	free(buf);
 
 	return NO_ERROR;
@@ -77,9 +63,6 @@ HASH calc_byte_hash(byte* data, size_t size)
 
 int change_bytes(byte* buf)
 {
-	//change bytes to make any password correct
-	//((3 * 16 + 8) - 1) - correct offset
-
 	byte hack[] = {0xEB, 0x56};
 	for(int i = 0; i < sizeof(hack); i++)
 		buf[3*16 + 7 + i] = hack[i];

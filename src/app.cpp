@@ -3,6 +3,9 @@
 #include <SFML/Audio.hpp>
 
 #include "app.h"
+#include "cracker.h"
+
+static const bool is_Started = 0;
 
 int run_app()
 {
@@ -23,12 +26,16 @@ int run_app()
     sf::Sprite bg(bg_texture, bg_rect);
 
     sf::RectangleShape hack_button(sf::Vector2(button_size_x, button_size_y));
-    hack_button.setFillColor(sf::Color::Green);
-    hack_button.setPosition({110, 250});
+    hack_button.setFillColor(sf::Color(41,49,51));
+    hack_button.setPosition({110, 248});
+
+    sf::RectangleShape progressBar({290, 15});
+    progressBar.setFillColor(sf::Color(0, 128, 0));
+    progressBar.setPosition({15, 248 + button_size_y / 2 - 7});
 
     sf::Text hack_text;
     hack_text.setFont(btn_font);
-    hack_text.setFillColor(sf::Color::Black);
+    hack_text.setFillColor(sf::Color::White);
     hack_text.setString("HACK!");
     hack_text.setPosition({130, 250});
 
@@ -36,6 +43,8 @@ int run_app()
 	sf::RenderWindow window(sf::VideoMode(img_size, img_size), "Cracker");
     sf::Event event;
     music.play();
+
+    CRACK_ERRORS err_code = NOTHING;
 
     while (window.isOpen())
     {
@@ -47,8 +56,8 @@ int run_app()
             if (event.type == sf::Event::MouseButtonPressed)
             {
                 sf::Vector2 mouse_pos = sf::Mouse::getPosition(window);
-                if (hack_button.getGlobalBounds().contains({mouse_pos.x, mouse_pos.y}))
-                    printf("TIK!\n");
+                if (hack_button.getGlobalBounds().contains({mouse_pos.x, mouse_pos.y}) && !is_Started)
+                    err_code = crack();
             }
 
             if (event.type == sf::Event::KeyPressed)
@@ -72,8 +81,23 @@ int run_app()
         window.clear();
 
         window.draw(bg);
+        window.draw(progressBar);
         window.draw(hack_button);
-        window.draw(hack_text);
+
+        switch (err_code)
+        {
+        case NOTHING:
+            window.draw(hack_text);
+            break;
+
+        case NO_ERROR:
+            printf("WIN!");
+            break;
+
+        default:
+            break;
+        }
+
 
         window.display();
     }

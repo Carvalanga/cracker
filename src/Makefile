@@ -10,13 +10,13 @@ CFLAGS := -Wshadow -Winit-self -Wredundant-decls -Wcast-align -Wundef -Wfloat-eq
 INCLUDE := ../include/
 MAIN 	:= main
 ODIR    := ../objects/
-NAMES   := app
+NAMES   := cracker app
 OBJ     := $(patsubst %, %.o, $(NAMES))
 TARGET  := ../crack
 
 all: $(TARGET)
 
-$(TARGET): $(addprefix $(ODIR), $(OBJ)) $(ODIR)main.o
+$(TARGET): $(ODIR)main.o $(addprefix $(ODIR), $(OBJ))
 
 	$(GCC) $^ -o $@ -lsfml-graphics -lsfml-window -lsfml-system -lsfml-audio
 
